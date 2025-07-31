@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Reprodutor de Vídeo Local</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    input[type="file"] {
+      margin: 20px 0;
+      color: white;
+    }
+
+    video {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      border: 2px solid #333;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    button {
+      margin: 10px 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #1e88e5;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎬 Abrir Vídeo da Galeria</h2>
+
+  <input type="file" accept="video/*" onchange="carregarVideo(event)">
+  <br>
+
+  <video id="videoPlayer" controls></video>
+  <br>
+
+  <button onclick="entrarFullscreen()">🔳 Fullscreen</button>
+  <button onclick="ativarPiP()">🖼️ Picture-in-Picture</button>
+  <button id="castButton" style="display:none">📺 Transmitir (TV)</button>
+
+  <script>
+    const video = document.getElementById('videoPlayer');
+
+    function carregarVideo(event) {
+      const arquivo = event.target.files[0];
+      if (arquivo) {
+        const url = URL.createObjectURL(arquivo);
+        video.src = url;
+        video.load();
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: arquivo.name,
+            artist: "Vídeo Local",
+            album: "Meu Aparelho",
+            artwork: []
+          });
+        }
+      }
+    }
+
+    function entrarFullscreen() {
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+      }
+    }
+
+    async function ativarPiP() {
+      if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+        try {
+          await video.requestPictureInPicture();
+        } catch (error) {
+          alert("Erro ao ativar Picture-in-Picture: " + error);
+        }
+      }
+    }
+
+    // Chromecast (Cast API) — aparece apenas se suportado
+    if (window.chrome && chrome.cast && chrome.cast.isAvailable) {
+      document.getElementById('castButton').style.display = 'inline-block';
+      // Aqui seria onde se inicializa a API do Cast
+      // Mas requer um servidor e configuração com app ID
+    }
+  </script>
+
+</body>
+</html>
